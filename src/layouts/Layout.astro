@@ -1,0 +1,77 @@
+---
+import { environment } from '~/consts/environment';
+import { languageTag } from '~/paraglide/runtime';
+
+interface Props {
+    title: string;
+}
+
+const { title } = Astro.props;
+const imageContentUrl = new URL(
+    `/images/logo_alt.webp`,
+    environment.baseUrl,
+).toString();
+const canonicalUrl = new URL(
+    Astro.url.pathname,
+    environment.baseUrl,
+).toString();
+---
+
+<!doctype html>
+<html lang={languageTag()} dir={Astro.locals.paraglide.dir}>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content="NextMU MMORPG Open-Source Project" />
+        <meta
+            name="keywords"
+            content="game, mmorpg, mu, muonline, mu online, nextmu, next mu, open-source, open source, mobile, desktop, pc, crossplatform, cross-platform, cross platform"
+        />
+        <meta name="viewport" content="width=device-width" />
+        <meta property="og:image" content={imageContentUrl} />
+        <link rel="canonical" href={canonicalUrl} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link
+            rel="preload"
+            href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
+            as="style"
+            onload="this.onload=null;this.rel='stylesheet'"
+        />
+        <noscript>
+            <link
+                href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
+                rel="stylesheet"
+            />
+        </noscript>
+        <style is:global lang="scss">
+            :root {
+            }
+            html {
+                font-family: 'Space Grotesk', system-ui, sans-serif;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+
+                &::after {
+                    content: ' ';
+                    z-index: -1;
+                    position: fixed;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(transparent, #000000d1);
+                }
+            }
+        </style>
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+    </head>
+    <body>
+        <slot />
+        <script>
+            import 'preline/dist/preline.js';
+        </script>
+    </body>
+</html>

@@ -1,0 +1,10 @@
+---
+import * as m from '~/paraglide/messages';
+---
+
+<footer class="flex flex-col items-center justify-center px-4 py-16">
+    <span
+        class="text-md text-white drop-shadow-text"
+        set:html={m.footer_message()}
+    />
+</footer>

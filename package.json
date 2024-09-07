@@ -1,17 +1,62 @@
 {
-  "name": "",
-  "type": "module",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro check && astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "astro": "^4.14.5",
-    "@astrojs/check": "^0.9.3",
-    "typescript": "^5.5.4"
-  }
+    "name": "nextmu-astro",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "astro dev",
+        "start": "astro dev",
+        "prebuild": "cross-env PROTO_PATH=./src/proto tsx ./proto/proto-generator.ts",
+        "build:proto": "cross-env PROTO_PATH=./src/proto tsx ./proto/proto-generator.ts",
+        "build": "paraglide-js compile --project ./project.inlang --outdir ./src\\paraglide && astro check && astro build",
+        "preview": "astro preview",
+        "astro": "astro",
+        "postinstall": "paraglide-js compile --project ./project.inlang --outdir ./src\\paraglide"
+    },
+    "dependencies": {
+        "@astrojs/check": "^0.9.3",
+        "@astrojs/node": "^8.3.3",
+        "@astrojs/svelte": "^5.7.0",
+        "@astrojs/tailwind": "^5.1.0",
+        "@grpc/grpc-js": "^1.11.2",
+        "@grpc/proto-loader": "0.7.13",
+        "@inlang/paraglide-astro": "^0.2.2",
+        "@steeze-ui/heroicons": "^2.4.0",
+        "@steeze-ui/simple-icons": "^1.9.0",
+        "@steeze-ui/svelte-icon": "^1.5.0",
+        "astro": "^4.15.4",
+        "flag-icons": "^7.2.3",
+        "hash-wasm": "^4.11.0",
+        "http-status-codes": "^2.3.0",
+        "ioredis": "^5.4.1",
+        "mongodb": "^6.8.1",
+        "nanostores": "^0.11.3",
+        "oauth4webapi": "^2.12.1",
+        "preline": "^2.4.1",
+        "rimraf": "^6.0.1",
+        "shelljs": "^0.8.5",
+        "svelte": "^4.2.19",
+        "tailwindcss": "^3.4.10",
+        "typescript": "^5.5.4",
+        "uuid-mongodb": "^2.5.5",
+        "wretch": "^2.9.1",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@inlang/paraglide-js": "1.11.2",
+        "@types/shelljs": "^0.8.15",
+        "cross-env": "^7.0.3",
+        "prettier": "^3.3.3",
+        "prettier-plugin-astro": "^0.14.1",
+        "prettier-plugin-svelte": "^3.2.6",
+        "prettier-plugin-tailwindcss": "^0.6.6",
+        "protobufjs": "^7.4.0",
+        "protobufjs-cli": "^1.1.3",
+        "sass": "^1.78.0",
+        "tsx": "^4.19.0"
+    },
+    "pnpm": {
+        "patchedDependencies": {
+            "@grpc/proto-loader": "patches/@grpc__proto-loader.patch"
+        }
+    }
 }

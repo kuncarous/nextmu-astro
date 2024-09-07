@@ -1,0 +1,47 @@
+---
+import * as m from '~/paraglide/messages';
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { languageTag } from '~/paraglide/runtime';
+const { selected } = Astro.props;
+---
+
+<div
+    class="mobile:flex-row max-mobile:mt-5 flex flex-col items-center gap-5 font-medium uppercase text-white sm:mt-0 sm:flex-row sm:items-center sm:justify-end sm:ps-5"
+>
+    <a
+        class={`drop-shadow-text hover:text-nextmu-green-hover active:text-nextmu-green-active ${selected === 'home' ? `text-nextmu-green-active` : ''}`}
+        href={selected !== 'home'
+            ? getRelativeLocaleUrl(languageTag(), '/')
+            : '#'}>{m.header_menu_home()}</a
+    >
+    <a
+        class={`drop-shadow-text hover:text-nextmu-green-hover active:text-nextmu-green-active ${selected === 'about-us' ? `text-nextmu-green-active` : ''}`}
+        href={selected !== 'about-us'
+            ? getRelativeLocaleUrl(languageTag(), '/about-us')
+            : '#'}>{m.header_menu_aboutus()}</a
+    >
+    <a
+        class={`drop-shadow-text hover:text-nextmu-green-hover active:text-nextmu-green-active ${selected === 'features' ? `text-nextmu-green-active` : ''}`}
+        href={selected !== 'features'
+            ? getRelativeLocaleUrl(languageTag(), '/features')
+            : '#'}>{m.header_menu_features()}</a
+    >
+    <a
+        class={`drop-shadow-text hover:text-nextmu-green-hover active:text-nextmu-green-active ${selected === 'sponsors' ? `text-nextmu-green-active` : ''}`}
+        href={selected !== 'sponsors'
+            ? getRelativeLocaleUrl(languageTag(), '/sponsors')
+            : '#'}>{m.header_menu_sponsors()}</a
+    >
+    <a
+        class={`drop-shadow-text hover:text-nextmu-green-hover active:text-nextmu-green-active ${selected === 'donations' ? `text-nextmu-green-active` : ''}`}
+        href={selected !== 'donations'
+            ? getRelativeLocaleUrl(languageTag(), '/donations')
+            : '#'}>{m.header_menu_donations()}</a
+    >
+    <a
+        class={`drop-shadow-text hover:text-nextmu-green-hover active:text-nextmu-green-active ${selected === 'contact-us' ? `text-nextmu-green-active` : ''}`}
+        href={selected !== 'contact-us'
+            ? getRelativeLocaleUrl(languageTag(), '/contact-us')
+            : '#'}>{m.header_menu_contactus()}</a
+    >
+</div>

@@ -5,15 +5,20 @@ import Header from '~/components/Header.astro';
 import Footer from '~/components/Footer.astro';
 import { Icon } from '@steeze-ui/svelte-icon';
 import { Github } from '@steeze-ui/simple-icons';
+import { Languages } from '~/consts/languages';
+
+export function getStaticPaths() {
+    return Object.keys(Languages).map((lang) => ({ params: { lang } }));
+}
 ---
 
 <Layout title="NextMU">
     <div class="container"></div>
     <Header selected="home" />
     <main
-        class="mt-[6rem] flex grow flex-col gap-14 px-2 text-white md:mt-[16rem]"
+        class="md:mt-[16rem] mt-[6rem] flex grow flex-col gap-14 px-2 text-white"
     >
-        <div class="drop-shadow-text flex flex-col items-center text-xl">
+        <div class="flex flex-col items-center text-xl drop-shadow-text">
             <span
                 class="mb-8 text-center text-3xl font-medium uppercase"
                 set:html={m.home_message_firstline()}
@@ -32,7 +37,7 @@ import { Github } from '@steeze-ui/simple-icons';
                 /></a
             >
             <a
-                class="shadow-repo border-nextmu-green hover:border-nextmu-green-hover active:border-nextmu-green-active flex skew-x-[-20deg] cursor-pointer select-none flex-row items-center justify-center gap-1 self-center rounded-lg border-2 px-8 py-5 text-white [&>*]:skew-x-[20deg]"
+                class="flex skew-x-[-20deg] cursor-pointer select-none flex-row items-center justify-center gap-1 self-center rounded-lg border-2 border-nextmu-green px-8 py-5 text-white shadow-repo hover:border-nextmu-green-hover active:border-nextmu-green-active [&>*]:skew-x-[20deg]"
                 style="background: #4bcc0040;"
                 href="https://github.com/kuncarous/nextmu"
                 target="_blank"
@@ -43,7 +48,7 @@ import { Github } from '@steeze-ui/simple-icons';
                 >
             </a>
         </div>
-        <div class="drop-shadow-text flex flex-col items-center text-xl">
+        <div class="flex flex-col items-center text-xl drop-shadow-text">
             <span class="text-center">{m.home_submessage_firstline()}</span>
             <span
                 class="text-center"
