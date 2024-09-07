@@ -1,0 +1,55 @@
+---
+import { Icon } from '@steeze-ui/svelte-icon';
+import Language from './Language.astro';
+import LanguageModal from './LanguageModal.svelte';
+import Navigation from './Navigation.astro';
+import { Bars3, XMark } from '@steeze-ui/heroicons';
+const { selected } = Astro.props;
+---
+
+<div class="mb-[4.5rem]"></div>
+<header
+    class="mobile:flex-nowrap fixed z-10 flex min-h-[4.5rem] w-full select-none flex-wrap justify-center bg-[#000000d0] px-4 py-4"
+>
+    <nav
+        class="mobile:flex-row mobile:items-center mobile:justify-between mx-auto flex w-full flex-col"
+        aria-label="Global"
+    >
+        <div class="flex items-center justify-between">
+            <img
+                class="h-9 max-h-none w-[11.75rem] max-w-none"
+                src="/images/logo.webp"
+                alt="NextMU Project Logo"
+            />
+            <div class="flex flex-row gap-x-4">
+                <Language class="mobile:hidden" />
+                <button
+                    type="button"
+                    class="hs-collapse-toggle mobile:hidden flex cursor-pointer flex-row gap-1 rounded-xl border border-nextmu-green bg-gray-500/45 p-1.5 text-white hover:border-nextmu-green-hover active:border-nextmu-green-active"
+                    data-hs-collapse="#navbar-collapse-with-animation"
+                    aria-controls="navbar-collapse-with-animation"
+                    aria-label="Toggle navigation"
+                >
+                    <Icon
+                        class="size-6 flex-shrink-0 drop-shadow-text hs-collapse-open:hidden"
+                        src={Bars3}
+                        theme="outline"
+                    />
+                    <Icon
+                        class="hidden size-6 flex-shrink-0 drop-shadow-text hs-collapse-open:block"
+                        src={XMark}
+                        theme="outline"
+                    />
+                </button>
+            </div>
+        </div>
+        <div
+            id="navbar-collapse-with-animation"
+            class="hs-collapse mobile:flex hidden grow basis-full flex-row justify-center overflow-hidden transition-all duration-300"
+        >
+            <Navigation selected={selected} />
+        </div>
+        <Language class="max-mobile:hidden ml-4" />
+    </nav>
+</header>
+<LanguageModal url={Astro.url.pathname} />

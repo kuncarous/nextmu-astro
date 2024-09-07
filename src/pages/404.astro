@@ -1,0 +1,48 @@
+---
+import { environment } from '~/consts/environment';
+
+const imageContentUrl = new URL(
+    `/images/logo_alt.webp`,
+    environment.baseUrl,
+).toString();
+const canonicalUrl = new URL(
+    `/images/logo_alt.webp`,
+    environment.baseUrl,
+).toString();
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta property="og:image" content={imageContentUrl} />
+        <link rel="canonical" href={canonicalUrl} />
+        <style is:global lang="scss">
+            body {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+        </style>
+        <meta name="generator" content={Astro.generator} />
+        <title>Oops Not Found</title>
+    </head>
+    <body>
+        <div
+            class="h-[100vh] max-h-[37.5rem] w-[80vw] max-w-[37.5rem] bg-contain bg-center bg-no-repeat"
+            style={{ backgroundImage: 'url("/images/not-found.svg")' }}
+        >
+        </div>
+        <span>
+            <a
+                class="text-blue-700 underline"
+                href="https://www.freepik.com/free-vector/oops-404-error-with-broken-robot-concept-illustration_13315300.htm"
+                >Image by storyset</a
+            >
+            on Freepik
+        </span>
+    </body>
+</html>

@@ -1,0 +1,21 @@
+{
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "always"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[svelte]": {
+        "editor.defaultFormatter": "svelte.svelte-vscode"
+    },
+    "editor.formatOnSave": true,
+    "files.autoSave": "afterDelay",
+    "cssVariables.lookupFiles": [
+        "**/*.css",
+        "**/*.scss",
+        "**/*.sass",
+        "**/*.less"
+    ],
+    "files.associations": {
+        "*.css": "tailwindcss"
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
+}

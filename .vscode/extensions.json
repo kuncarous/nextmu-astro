@@ -1,4 +1,10 @@
 {
-  "recommendations": ["astro-build.astro-vscode"],
-  "unwantedRecommendations": []
+    "recommendations": [
+        "astro-build.astro-vscode",
+        "svelte.svelte-vscode",
+        "esbenp.prettier-vscode",
+        "inlang.vs-code-extension",
+        "bradlc.vscode-tailwindcss"
+    ],
+    "unwantedRecommendations": []
 }
