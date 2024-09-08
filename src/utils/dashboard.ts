@@ -1,10 +1,6 @@
 import type { IPublicUserInfo } from '~/providers/auth/types';
 
-const DashboardRoles: RegExp = new RegExp(
-    '^(?:(\
-update\\:.*\
-))$',
-);
+const DashboardRoles = /^(?:(update\:.*))$/;
 
 export function hasDashboardRoles(user: IPublicUserInfo | null) {
     if (user == null) return false;

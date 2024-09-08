@@ -9,6 +9,7 @@ import { getSessionFromRedis, saveSessionInRedis } from './redis/auth.server';
 import { environment } from '~/consts/environment';
 import type { APIContext } from 'astro';
 import { createCookieStorage, type CookieStorage } from '~/utils/cookies';
+import { StatusCodes } from 'http-status-codes';
 
 interface ISessionRequestData {
     redirect_url?: string;
@@ -26,8 +27,8 @@ export const getSessionRequestStorage = async () => {
         sameSite: 'lax', // this helps with CSRF
         path: '/', // remember to add this so the cookie will work in all routes
         httpOnly: true, // for security reasons, make this cookie http only
-        secrets: environment.cookies.secrets, // replace this with an actual secret
-        secure: process.env.NODE_ENV === 'production', // enable this in prod only
+        secrets: environment.cookies.secrets.request, // replace this with an actual secret
+        secure: environment.isProduction, // enable this in prod only
     });
     return sessionRequestStorage;
 };
@@ -43,8 +44,8 @@ export const getSessionStorage = async () => {
         sameSite: 'lax', // this helps with CSRF
         path: '/', // remember to add this so the cookie will work in all routes
         httpOnly: true, // for security reasons, make this cookie http only
-        secrets: environment.cookies.secrets, // replace this with an actual secret
-        secure: process.env.NODE_ENV === 'production', // enable this in prod only
+        secrets: environment.cookies.secrets.session, // replace this with an actual secret
+        secure: environment.isProduction, // enable this in prod only
     });
     return sessionStorage;
 };
@@ -54,13 +55,13 @@ export const getAuthorizationServer = async () => {
     try {
         if (authorizationServer != null) return authorizationServer;
 
-        const url = new URL(process.env.OPENID_ISSUER_URL!);
-        const response = await oidc.discoveryRequest(url);
+        const { issuerUrl } = environment.openId;
+        const response = await oidc.discoveryRequest(issuerUrl);
         if (!response.ok) {
             return null;
         }
 
-        return await oidc.processDiscoveryResponse(url, response);
+        return await oidc.processDiscoveryResponse(issuerUrl, response);
     } catch (error) {
         return null;
     }
@@ -70,10 +71,9 @@ let portalAuthClient: oidc.Client | null = null;
 export const getPortalAuthClient = async () => {
     if (portalAuthClient != null) return portalAuthClient;
     portalAuthClient = {
-        client_id: process.env.PORTAL_OPENID_CLIENT_ID!,
-        client_secret: process.env.PORTAL_OPENID_CLIENT_SECRET || undefined,
-        token_endpoint_auth_method: (process.env.PORTAL_OPENID_AUTH_METHOD ||
-            'none') as oidc.ClientAuthenticationMethod,
+        client_id: environment.openId.portal.clientId,
+        client_secret: environment.openId.portal.clientSecret,
+        token_endpoint_auth_method: environment.openId.portal.authMethod,
     };
     return portalAuthClient;
 };
@@ -82,11 +82,9 @@ let portalApiAuthClient: oidc.Client | null = null;
 export const getPortalApiAuthClient = async () => {
     if (portalApiAuthClient != null) return portalApiAuthClient;
     portalApiAuthClient = {
-        client_id: process.env.PORTAL_API_OPENID_CLIENT_ID!,
-        client_secret: process.env.PORTAL_API_OPENID_CLIENT_SECRET!,
-        token_endpoint_auth_method: (process.env
-            .PORTAL_API_OPENID_AUTH_METHOD ||
-            'client_secret_basic') as oidc.ClientAuthenticationMethod,
+        client_id: environment.openId.api.clientId,
+        client_secret: environment.openId.api.clientSecret,
+        token_endpoint_auth_method: environment.openId.api.authMethod,
     };
     return portalApiAuthClient;
 };
@@ -104,13 +102,23 @@ export const getAccessToken = async (context: APIContext) => {
 };
 
 const code_challenge_method = 'S256';
-export const redirectToLogin = async (context: APIContext) => {
+export const redirectToLogin = async (
+    context: APIContext,
+): Promise<Response> => {
     try {
         const sessionRequestStorage = await getSessionRequestStorage();
-        if (sessionRequestStorage == null) return null;
+        if (sessionRequestStorage == null)
+            return new Response(null, {
+                status: StatusCodes.SERVICE_UNAVAILABLE,
+                statusText: 'Service Unavailable',
+            });
 
         const authServer = await getAuthorizationServer();
-        if (authServer == null) return null;
+        if (authServer == null)
+            return new Response(null, {
+                status: StatusCodes.SERVICE_UNAVAILABLE,
+                statusText: 'Service Unavailable',
+            });
 
         const code_verifier = oidc.generateRandomCodeVerifier();
         const code_challenge =
@@ -120,7 +128,7 @@ export const redirectToLogin = async (context: APIContext) => {
         const authorizationUrl = new URL(authServer.authorization_endpoint!);
         authorizationUrl.searchParams.set(
             'client_id',
-            process.env.PORTAL_OPENID_CLIENT_ID!,
+            environment.openId.portal.clientId,
         );
         authorizationUrl.searchParams.set(
             'redirect_uri',
@@ -129,12 +137,7 @@ export const redirectToLogin = async (context: APIContext) => {
         authorizationUrl.searchParams.set('response_type', 'code');
         authorizationUrl.searchParams.set(
             'scope',
-            [
-                'openid profile email offline_access',
-                process.env.PORTAL_OPENID_ADDITIONAL_SCOPES,
-            ]
-                .filter((v) => !!v)
-                .join(' '),
+            environment.openId.portal.additionalScopes,
         );
 
         const codeChallengeMethodSupported =
@@ -167,17 +170,30 @@ export const redirectToLogin = async (context: APIContext) => {
         await sessionRequestStorage.set(sessionRequest, context.cookies);
         return context.redirect(authorizationUrl.href);
     } catch (error) {
-        return null;
+        return new Response(null, {
+            status: StatusCodes.SERVICE_UNAVAILABLE,
+            statusText: 'Service Unavailable',
+        });
     }
 };
 
-export const redirectToRegister = async (context: APIContext) => {
+export const redirectToRegister = async (
+    context: APIContext,
+): Promise<Response> => {
     try {
         const sessionRequestStorage = await getSessionRequestStorage();
-        if (sessionRequestStorage == null) return null;
+        if (sessionRequestStorage == null)
+            return new Response(null, {
+                status: StatusCodes.SERVICE_UNAVAILABLE,
+                statusText: 'Service Unavailable',
+            });
 
         const authServer = await getAuthorizationServer();
-        if (authServer == null) return null;
+        if (authServer == null)
+            return new Response(null, {
+                status: StatusCodes.SERVICE_UNAVAILABLE,
+                statusText: 'Service Unavailable',
+            });
 
         const code_verifier = oidc.generateRandomCodeVerifier();
         const code_challenge =
@@ -187,7 +203,7 @@ export const redirectToRegister = async (context: APIContext) => {
         const authorizationUrl = new URL(authServer.authorization_endpoint!);
         authorizationUrl.searchParams.set(
             'client_id',
-            process.env.PORTAL_OPENID_CLIENT_ID!,
+            environment.openId.portal.clientId,
         );
         authorizationUrl.searchParams.set(
             'redirect_uri',
@@ -196,12 +212,7 @@ export const redirectToRegister = async (context: APIContext) => {
         authorizationUrl.searchParams.set('response_type', 'code');
         authorizationUrl.searchParams.set(
             'scope',
-            [
-                'openid profile email offline_access',
-                process.env.PORTAL_OPENID_ADDITIONAL_SCOPES,
-            ]
-                .filter((v) => !!v)
-                .join(' '),
+            environment.openId.portal.additionalScopes,
         );
 
         const codeChallengeMethodSupported =
@@ -234,17 +245,30 @@ export const redirectToRegister = async (context: APIContext) => {
         await sessionRequestStorage.set(sessionRequest, context.cookies);
         return context.redirect(authorizationUrl.href);
     } catch (error) {
-        return null;
+        return new Response(null, {
+            status: StatusCodes.SERVICE_UNAVAILABLE,
+            statusText: 'Service Unavailable',
+        });
     }
 };
 
-export const redirectToSwitch = async (context: APIContext) => {
+export const redirectToSwitch = async (
+    context: APIContext,
+): Promise<Response> => {
     try {
         const sessionRequestStorage = await getSessionRequestStorage();
-        if (sessionRequestStorage == null) return null;
+        if (sessionRequestStorage == null)
+            return new Response(null, {
+                status: StatusCodes.SERVICE_UNAVAILABLE,
+                statusText: 'Service Unavailable',
+            });
 
         const authServer = await getAuthorizationServer();
-        if (authServer == null) return null;
+        if (authServer == null)
+            return new Response(null, {
+                status: StatusCodes.SERVICE_UNAVAILABLE,
+                statusText: 'Service Unavailable',
+            });
 
         const code_verifier = oidc.generateRandomCodeVerifier();
         const code_challenge =
@@ -254,7 +278,7 @@ export const redirectToSwitch = async (context: APIContext) => {
         const authorizationUrl = new URL(authServer.authorization_endpoint!);
         authorizationUrl.searchParams.set(
             'client_id',
-            process.env.PORTAL_OPENID_CLIENT_ID!,
+            environment.openId.portal.clientId,
         );
         authorizationUrl.searchParams.set(
             'redirect_uri',
@@ -263,12 +287,7 @@ export const redirectToSwitch = async (context: APIContext) => {
         authorizationUrl.searchParams.set('response_type', 'code');
         authorizationUrl.searchParams.set(
             'scope',
-            [
-                'openid profile email offline_access',
-                process.env.PORTAL_OPENID_ADDITIONAL_SCOPES,
-            ]
-                .filter((v) => !!v)
-                .join(' '),
+            environment.openId.portal.additionalScopes,
         );
 
         const codeChallengeMethodSupported =
@@ -301,7 +320,10 @@ export const redirectToSwitch = async (context: APIContext) => {
         await sessionRequestStorage.set(sessionRequest, context.cookies);
         return context.redirect(authorizationUrl.href);
     } catch (error) {
-        return null;
+        return new Response(null, {
+            status: StatusCodes.SERVICE_UNAVAILABLE,
+            statusText: 'Service Unavailable',
+        });
     }
 };
 
@@ -403,7 +425,7 @@ export const processAuthResponse = async (context: APIContext) => {
             ),
         };
         await saveSessionInRedis(
-            process.env.OPENID_PROJECT_ID!,
+            environment.openId.projectId,
             authorizationResult.access_token,
             userInfo,
         );
@@ -422,21 +444,35 @@ export const processAuthResponse = async (context: APIContext) => {
     }
 };
 
-export const redirectToLogout = async (context: APIContext) => {
+export const redirectToLogout = async (
+    context: APIContext,
+): Promise<Response> => {
     try {
         const sessionStorage = await getSessionStorage();
-        if (sessionStorage == null) return null;
+        if (sessionStorage == null)
+            return new Response(null, {
+                status: StatusCodes.SERVICE_UNAVAILABLE,
+                statusText: 'Service Unavailable',
+            });
 
         const authServer = await getAuthorizationServer();
-        if (authServer == null) return null;
+        if (authServer == null)
+            return new Response(null, {
+                status: StatusCodes.SERVICE_UNAVAILABLE,
+                statusText: 'Service Unavailable',
+            });
 
         const sessionData = await sessionStorage.get(context.cookies);
-        if (sessionData == null) return null;
+        if (sessionData == null)
+            return new Response(null, {
+                status: StatusCodes.SERVICE_UNAVAILABLE,
+                statusText: 'Service Unavailable',
+            });
 
         const endSessionUrl = new URL(authServer.end_session_endpoint!);
         endSessionUrl.searchParams.set(
             'client_id',
-            process.env.PORTAL_OPENID_CLIENT_ID!,
+            environment.openId.portal.clientId,
         );
         endSessionUrl.searchParams.set(
             'post_logout_redirect_uri',
@@ -451,7 +487,10 @@ export const redirectToLogout = async (context: APIContext) => {
 
         return context.redirect(endSessionUrl.href);
     } catch (error) {
-        return null;
+        return new Response(null, {
+            status: StatusCodes.SERVICE_UNAVAILABLE,
+            statusText: 'Service Unavailable',
+        });
     }
 };
 
@@ -527,7 +566,7 @@ export const getUserInfo = async (
         }
 
         return await oidc.processDiscoveryResponse(
-            new URL(process.env.PORTAL_OPENID_ISSUER_URL!),
+            environment.openId.issuerUrl,
             response,
         );
     } catch (error) {
@@ -545,7 +584,7 @@ export const isAuthenticated = async (
     if (accessToken == null) return false;
 
     const cachedSession = await getSessionFromRedis(
-        process.env.OPENID_PROJECT_ID!,
+        environment.openId.projectId,
         accessToken,
     );
     if (cachedSession != null) return true;
@@ -597,7 +636,7 @@ export const isAuthenticated = async (
         ),
     };
     await saveSessionInRedis(
-        process.env.OPENID_PROJECT_ID!,
+        environment.openId.projectId,
         accessToken,
         userInfo,
     );
@@ -615,7 +654,7 @@ export const getPublicUserInfoFromSession = async (
     if (accessToken == null) return null;
 
     const cachedSession = await getSessionFromRedis(
-        process.env.OPENID_PROJECT_ID!,
+        environment.openId.projectId,
         accessToken,
     );
     if (cachedSession != null) return ZPublicUserInfo.parse(cachedSession);
@@ -678,7 +717,7 @@ export const getPublicUserInfoFromSession = async (
     }
 
     await saveSessionInRedis(
-        process.env.OPENID_PROJECT_ID!,
+        environment.openId.projectId,
         accessToken,
         userInfo,
     );

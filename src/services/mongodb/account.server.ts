@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import type { IntrospectionResponse } from 'oauth4webapi';
 import { getMongoClient } from './client.server';
+import { environment } from '~/consts/environment';
 
 interface IAccount {
     sub: string;
@@ -8,9 +9,7 @@ interface IAccount {
     createdAt: Date;
 }
 
-export const createOrFindAccount = async (
-    session: IntrospectionResponse,
-) => {
+export const createOrFindAccount = async (session: IntrospectionResponse) => {
     try {
         const mongoClient = await getMongoClient();
         const collection = mongoClient
@@ -19,10 +18,10 @@ export const createOrFindAccount = async (
 
         const aud =
             session.aud == null
-                ? process.env.OPENID_PROJECT_ID!
+                ? environment.openId.projectId
                 : Array.isArray(session.aud)
-                  ? session.aud.includes(process.env.OPENID_PROJECT_ID!)
-                      ? process.env.OPENID_PROJECT_ID!
+                  ? session.aud.includes(environment.openId.projectId)
+                      ? environment.openId.projectId
                       : session.aud[session.aud.length - 1]
                   : session.aud;
         const updateResult = await collection.updateOne(
@@ -54,9 +53,7 @@ export const createOrFindAccount = async (
     }
 };
 
-export const findAccount = async (
-    accountId: ObjectId,
-) => {
+export const findAccount = async (accountId: ObjectId) => {
     try {
         const mongoClient = await getMongoClient();
         const collection = mongoClient
@@ -75,9 +72,7 @@ export const findAccount = async (
     }
 };
 
-export const checkAccountExists = async (
-    accountId: ObjectId,
-) => {
+export const checkAccountExists = async (accountId: ObjectId) => {
     try {
         const mongoClient = await getMongoClient();
         const collection = mongoClient

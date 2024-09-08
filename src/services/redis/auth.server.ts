@@ -1,4 +1,4 @@
-import { IUserInfo } from '~/providers/auth/types';
+import type { IUserInfo } from '~/providers/auth/types';
 import { getRedisClient } from './client.server';
 
 const getSessionKey = (projectId: string, accessToken: string) =>

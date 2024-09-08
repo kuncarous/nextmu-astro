@@ -1,6 +1,6 @@
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
-import { Empty__Output } from '~/proto/google/protobuf/Empty';
+import type { Empty__Output } from '~/proto/google/protobuf/Empty';
 import type { CreateVersionRequest } from '~/proto/nextmu/v1/CreateVersionRequest';
 import type { CreateVersionResponse__Output as CreateVersionResponse } from '~/proto/nextmu/v1/CreateVersionResponse';
 import type { EditVersionRequest } from '~/proto/nextmu/v1/EditVersionRequest';
@@ -8,15 +8,16 @@ import type { FetchVersionRequest } from '~/proto/nextmu/v1/FetchVersionRequest'
 import type { FetchVersionResponse__Output as FetchVersionResponse } from '~/proto/nextmu/v1/FetchVersionResponse';
 import type { ListVersionsRequest } from '~/proto/nextmu/v1/ListVersionsRequest';
 import type { ListVersionsResponse__Output as ListVersionsResponse } from '~/proto/nextmu/v1/ListVersionsResponse';
-import { StartUploadVersionRequest } from '~/proto/nextmu/v1/StartUploadVersionRequest';
-import { StartUploadVersionResponse__Output as StartUploadVersionResponse } from '~/proto/nextmu/v1/StartUploadVersionResponse';
+import type { StartUploadVersionRequest } from '~/proto/nextmu/v1/StartUploadVersionRequest';
+import type { StartUploadVersionResponse__Output as StartUploadVersionResponse } from '~/proto/nextmu/v1/StartUploadVersionResponse';
 import type { UpdateServiceClient } from '~/proto/nextmu/v1/UpdateService';
-import { UploadVersionChunkRequest } from '~/proto/nextmu/v1/UploadVersionChunkRequest';
-import { UploadVersionChunkResponse__Output as UploadVersionChunkResponse } from '~/proto/nextmu/v1/UploadVersionChunkResponse';
+import type { UploadVersionChunkRequest } from '~/proto/nextmu/v1/UploadVersionChunkRequest';
+import type { UploadVersionChunkResponse__Output as UploadVersionChunkResponse } from '~/proto/nextmu/v1/UploadVersionChunkResponse';
 import { VersionType } from '~/proto/nextmu/v1/VersionType';
 import type { ProtoGrpcType } from '~/proto/update';
-import { TRpcError, promisifyRpc } from '~/utils/grpc.server';
+import { type TRpcError, promisifyRpc } from '~/utils/grpc.server';
 import { defaultProtoLoaderConfig } from './config.server';
+import { environment } from '~/consts/environment';
 
 const deadline = 5000;
 const updateDefinition = protoLoader.loadSync(
@@ -31,7 +32,7 @@ let gameUpdateService: UpdateServiceClient | null = null;
 export const getGameUpdateService = async () => {
     if (gameUpdateService != null) return gameUpdateService;
     const service = new updateProto.nextmu.v1.UpdateService(
-        process.env.UPDATESERVICE_GAME_ADDRESS!,
+        environment.updateService.game,
         grpc.credentials.createInsecure(),
     );
     try {
@@ -51,7 +52,7 @@ let launcherUpdateService: UpdateServiceClient | null = null;
 export const getLauncherUpdateService = async () => {
     if (launcherUpdateService != null) return launcherUpdateService;
     const service = new updateProto.nextmu.v1.UpdateService(
-        process.env.UPDATESERVICE_LAUNCHER_ADDRESS!,
+        environment.updateService.launcher,
         grpc.credentials.createInsecure(),
     );
     try {

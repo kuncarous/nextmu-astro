@@ -1,8 +1,11 @@
 import type { IPublicUserInfo } from './types';
-import { map } from 'nanostores';
+import { persistentAtom } from '@nanostores/persistent';
 
-export const $profile = map<{
-    profile: IPublicUserInfo | null;
-}>({
-    profile: null,
-});
+export const $profile = persistentAtom<IPublicUserInfo | null>(
+    'profile',
+    null,
+    {
+        encode: JSON.stringify,
+        decode: JSON.parse,
+    },
+);

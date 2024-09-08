@@ -30,7 +30,7 @@ export type IUploadVersionChunk = z.infer<typeof ZUploadVersionChunkBase> & {
     data: string;
 };
 
-export const POST: APIRoute = async (context) => {
+export const POST: APIRoute = async (context): Promise<Response> => {
     const accessToken = await getAccessToken(context);
     if (accessToken == null) {
         return redirectToLogin(context);

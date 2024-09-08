@@ -4,11 +4,14 @@ import svelte from '@astrojs/svelte';
 import paraglide from '@inlang/paraglide-astro';
 import node from '@astrojs/node';
 
+import react from '@astrojs/react';
+
 // https://astro.build/config
 export default defineConfig({
     integrations: [
         tailwind(),
         svelte(),
+        react(),
         paraglide({
             project: './project.inlang',
             outdir: './src/paraglide',

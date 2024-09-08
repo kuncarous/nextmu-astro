@@ -1,6 +1,6 @@
 import * as grpc from '@grpc/grpc-js';
-import { json } from '@remix-run/node';
 import { StatusCodes } from 'http-status-codes';
+import { json } from './response';
 
 const parseGrpcErrorIntoResponseState = (error: grpc.ServiceError) => {
     switch (error.code) {

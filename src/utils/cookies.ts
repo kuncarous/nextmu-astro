@@ -4,7 +4,6 @@ import type {
     AstroCookieSetOptions,
 } from 'astro';
 import * as crypto from 'crypto';
-import { environment } from '~/consts/environment';
 
 const cipherAlgorithm = 'aes-256-gcm';
 const cipherIVLength = 12; // it is recommended 12 bytes for GCM and 16 bytes for CBC

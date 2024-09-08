@@ -1,20 +1,18 @@
-import redis, { RedisOptions } from 'ioredis';
+import redis, { type RedisOptions } from 'ioredis';
+import { environment } from '~/consts/environment';
 
 let client: redis | null = null;
 export const getRedisClient = async (): Promise<redis> => {
     if (client != null) return client;
     const RedisConnection: RedisOptions = {
-        host: process.env.REDIS_HOST,
-        port:
-            process.env.REDIS_PORT != null
-                ? +process.env.REDIS_PORT
-                : undefined,
-        username: process.env.REDIS_USER || undefined,
-        password: process.env.REDIS_PASS || undefined,
+        host: environment.redis.host,
+        port: environment.redis.port,
+        username: environment.redis.user,
+        password: environment.redis.pass,
         tls:
-            process.env.REDIS_SSL != null && +process.env.REDIS_SSL >= 1
+            environment.redis.ssl === true
                 ? {
-                      servername: process.env.REDIS_HOST,
+                      servername: environment.redis.host,
                   }
                 : undefined,
     };

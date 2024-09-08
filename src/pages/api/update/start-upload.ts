@@ -33,7 +33,7 @@ export const ZStartUploadVersion = z.object({
 });
 export type IStartUploadVersion = z.infer<typeof ZStartUploadVersion>;
 
-export const POST: APIRoute = async (context) => {
+export const POST: APIRoute = async (context): Promise<Response> => {
     const accessToken = await getAccessToken(context);
     if (accessToken == null) {
         return redirectToLogin(context);
